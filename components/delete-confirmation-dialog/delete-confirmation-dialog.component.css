@@ -1,0 +1,168 @@
+/* Modal backdrop styling */
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 1040;
+}
+
+/* Modal dialog styling */
+.modal {
+  z-index: 1050;
+}
+
+.modal-dialog {
+  max-width: 600px;
+  margin: 1.75rem auto;
+}
+
+.modal-content {
+  border: none;
+  border-radius: 8px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.modal-header {
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #dee2e6;
+  padding: 1rem 1.5rem;
+}
+
+.modal-title {
+  color: #dc3545;
+  font-weight: 600;
+  margin: 0;
+  display: flex;
+  align-items: center;
+}
+
+.modal-body {
+  padding: 1.5rem;
+}
+
+.employee-details {
+  background-color: #f8f9fa;
+  padding: 1rem;
+  border-radius: 6px;
+  border: 1px solid #e9ecef;
+}
+
+.employee-details h6 {
+  color: #495057;
+  margin-bottom: 1rem;
+}
+
+.employee-details .row {
+  margin-bottom: 0.5rem;
+}
+
+.employee-details .row:last-child {
+  margin-bottom: 0;
+}
+
+.employee-details .fw-semibold {
+  color: #6c757d;
+}
+
+.employee-details .col-8 {
+  color: #212529;
+}
+
+/* Alert customizations */
+.alert {
+  border: none;
+  border-radius: 6px;
+}
+
+.alert-danger {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+.alert-warning {
+  background-color: #fff3cd;
+  color: #856404;
+}
+
+.alert-heading {
+  color: inherit;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.alert i {
+  font-size: 1.1rem;
+}
+
+/* Modal footer */
+.modal-footer {
+  background-color: #f8f9fa;
+  border-top: 1px solid #dee2e6;
+  padding: 1rem 1.5rem;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+.btn {
+  border-radius: 4px;
+  font-weight: 500;
+  padding: 0.5rem 1rem;
+}
+
+.btn-danger {
+  background-color: #dc3545;
+  border-color: #dc3545;
+}
+
+.btn-danger:hover {
+  background-color: #c82333;
+  border-color: #bd2130;
+}
+
+.btn-secondary {
+  background-color: #6c757d;
+  border-color: #6c757d;
+}
+
+.btn-secondary:hover {
+  background-color: #5a6268;
+  border-color: #545b62;
+}
+
+/* Close button */
+.btn-close {
+  background: none;
+  border: none;
+  font-size: 1.25rem;
+  opacity: 0.5;
+}
+
+.btn-close:hover {
+  opacity: 0.75;
+}
+
+/* Responsive adjustments */
+@media (max-width: 576px) {
+  .modal-dialog {
+    margin: 1rem;
+    max-width: calc(100% - 2rem);
+  }
+  
+  .employee-details .col-4,
+  .employee-details .col-8 {
+    flex: 0 0 100%;
+    max-width: 100%;
+  }
+  
+  .employee-details .col-4 {
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+  }
+  
+  .employee-details .col-8 {
+    margin-bottom: 0.75rem;
+  }
+}

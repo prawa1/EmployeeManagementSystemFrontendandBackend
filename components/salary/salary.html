@@ -1,0 +1,205 @@
+
+<div class="container-fluid">
+  <div class="row min-vh-100">
+
+    <!-- Sidebar -->
+    <nav class="col-md-3 col-lg-2 d-md-block bg-primary text-white sidebar py-4 shadow-sm">
+      <div class="position-sticky">
+        <h4 class="text-center mb-4">Employee Panel</h4>
+        <ul class="nav flex-column px-3">
+          <li class="nav-item mb-3">
+            <a class="nav-link text-white" routerLink="/employeedashurl">🏠 Dashboard</a>
+          </li>
+          <li class="nav-item mb-3">
+            <a class="nav-link text-white" routerLink="/myprofileurl">👤 My Profile</a>
+          </li>
+          <li class="nav-item mb-3">
+            <a class="nav-link text-white" routerLink="/leaveurl">📝 Leave</a>
+          </li>
+          <li class="nav-item mb-3">
+            <a class="nav-link text-white" routerLink="/salaryurl">💰 Salary</a>
+          </li>
+          <li class="nav-item mb-3">
+            <a class="nav-link text-white" routerLink="/settingsurl">⚙️ Settings</a>
+          </li>
+           <li class="nav-item mb-3">
+            <a class="nav-link text-white" (click)="logout()">🚪 Logout</a>
+          </li>
+        </ul>
+      </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="col-md-9 ms-sm-auto col-lg-10 px-md-5 py-4 bg-light">
+      <div class="container mt-4">
+        <h3 class="mb-4">💰 Salary Payslip Form</h3>
+        
+        <!-- Loading Indicator -->
+        <div *ngIf="isLoading" class="loading-container">
+          <div class="spinner-border text-primary" role="status">
+            <span class="sr-only">Loading...</span>
+          </div>
+          <div class="loading-text">Loading payslip data<span class="loading-dots"></span></div>
+        </div>
+
+        <!-- Error/Success Message -->
+        <div *ngIf="errorMessage && !isLoading" class="error-container">
+          <div class="error-icon" [ngClass]="{
+            'text-danger': errorType === 'general' || errorType === 'server_error' || errorType === 'pdf_generation',
+            'text-warning': errorType === 'no_data' || errorType === 'not_found' || errorType === 'data_integrity',
+            'text-info': errorType === 'session_expired' || errorType === 'session_invalid' || errorType === 'access_denied',
+            'text-success': errorType === 'success'
+          }">
+            <i class="fas" [ngClass]="{
+              'fa-exclamation-triangle': errorType === 'general' || errorType === 'server_error' || errorType === 'pdf_generation',
+              'fa-info-circle': errorType === 'no_data' || errorType === 'not_found' || errorType === 'data_integrity',
+              'fa-lock': errorType === 'session_expired' || errorType === 'session_invalid' || errorType === 'access_denied',
+              'fa-check-circle': errorType === 'success'
+            }"></i>
+          </div>
+          <div class="error-message" [ngClass]="{
+            'text-success': errorType === 'success'
+          }">{{ errorMessage }}</div>
+          
+          <!-- Additional context messages -->
+          <div *ngIf="errorType === 'session_expired' || errorType === 'session_invalid'" class="error-submessage text-info">
+            You will be redirected to login page automatically.
+          </div>
+          <div *ngIf="errorType === 'access_denied'" class="error-submessage text-warning">
+            Please contact your administrator if you believe this is an error.
+          </div>
+          <div *ngIf="errorType === 'pdf_generation'" class="error-submessage text-danger">
+            Your payslip data is available but PDF generation failed.
+          </div>
+          
+          <!-- Action buttons -->
+          <div class="mt-3">
+            <button *ngIf="showRetryButton" type="button" class="btn btn-primary" (click)="loadPayslipData()">
+              <i class="fas fa-redo me-2"></i>Try Again
+            </button>
+            <button *ngIf="errorType === 'pdf_generation'" type="button" class="btn btn-success ms-2" (click)="retryDownload()">
+              <i class="fas fa-download me-2"></i>Retry Download
+            </button>
+            <button *ngIf="errorType === 'pdf_generation' || errorType === 'data_integrity'" type="button" class="btn btn-secondary ms-2" (click)="refreshPage()">
+              <i class="fas fa-refresh me-2"></i>Refresh Page
+            </button>
+          </div>
+        </div>
+        
+        <!-- Payslip Form -->
+        <div *ngIf="!isLoading && !errorMessage" class="card shadow-lg">
+          <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">Employee Payslip Information</h5>
+          </div>
+          <div class="card-body">
+          <form>
+            <!-- Employee Details Section -->
+            <div class="row mb-4">
+              <div class="col-12">
+                <h6 class="text-primary mb-3">Employee Details</h6>
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label"><strong>Employee ID:</strong></label>
+                <input type="text" class="form-control" [value]="payslipData?.empId || 'Loading...'" readonly>
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label"><strong>Employee Name:</strong></label>
+                <input type="text" class="form-control" [value]="payslipData?.empName || 'Loading...'" readonly>
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label"><strong>Department:</strong></label>
+                <input type="text" class="form-control" [value]="payslipData ? getDepartmentName() : 'Loading...'" 
+                       [class.text-muted]="!payslipData || getDepartmentName() === 'Department Not Assigned'"
+                       [class.fst-italic]="!payslipData || getDepartmentName() === 'Department Not Assigned'" readonly>
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label"><strong>Month/Year:</strong></label>
+                <input type="text" class="form-control" [value]="(payslipData?.month || '') + ' ' + (payslipData?.year || '')" readonly>
+              </div>
+            </div>
+
+            <!-- Earnings Section -->
+            <div class="row mb-4">
+              <div class="col-12">
+                <h6 class="text-success mb-3">💰 Earnings</h6>
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label"><strong>Basic Pay:</strong></label>
+                <input type="text" class="form-control" [value]="payslipData && payslipData.basicPay !== undefined ? '₹' + payslipData.basicPay.toLocaleString('en-IN', {minimumFractionDigits: 2}) : 'Loading...'" readonly>
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label"><strong>HRA:</strong></label>
+                <input type="text" class="form-control" [value]="payslipData && payslipData.hra !== undefined ? '₹' + payslipData.hra.toLocaleString('en-IN', {minimumFractionDigits: 2}) : 'Loading...'" readonly>
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label"><strong>Medical Allowance:</strong></label>
+                <input type="text" class="form-control" [value]="payslipData && payslipData.medicalAllowance !== undefined ? '₹' + payslipData.medicalAllowance.toLocaleString('en-IN', {minimumFractionDigits: 2}) : 'Loading...'" readonly>
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label"><strong>Transport Allowance:</strong></label>
+                <input type="text" class="form-control" [value]="payslipData && payslipData.transportAllowance !== undefined ? '₹' + payslipData.transportAllowance.toLocaleString('en-IN', {minimumFractionDigits: 2}) : 'Loading...'" readonly>
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label"><strong>Other Allowances:</strong></label>
+                <input type="text" class="form-control" [value]="payslipData && payslipData.otherAllowances !== undefined ? '₹' + payslipData.otherAllowances.toLocaleString('en-IN', {minimumFractionDigits: 2}) : 'Loading...'" readonly>
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label"><strong>Gross Salary:</strong></label>
+                <input type="text" class="form-control bg-success text-white fw-bold" [value]="payslipData && payslipData.grossSalary !== undefined ? '₹' + payslipData.grossSalary.toLocaleString('en-IN', {minimumFractionDigits: 2}) : 'Loading...'" readonly>
+              </div>
+            </div>
+
+            <!-- Deductions Section -->
+            <div class="row mb-4">
+              <div class="col-12">
+                <h6 class="text-danger mb-3">💸 Deductions</h6>
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label"><strong>Provident Fund (PF):</strong></label>
+                <input type="text" class="form-control" [value]="payslipData && payslipData.pf !== undefined ? '₹' + payslipData.pf.toLocaleString('en-IN', {minimumFractionDigits: 2}) : 'Loading...'" readonly>
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label"><strong>ESI:</strong></label>
+                <input type="text" class="form-control" [value]="payslipData && payslipData.esi !== undefined ? '₹' + payslipData.esi.toLocaleString('en-IN', {minimumFractionDigits: 2}) : 'Loading...'" readonly>
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label"><strong>Tax Deductions:</strong></label>
+                <input type="text" class="form-control" [value]="payslipData && payslipData.taxDeductions !== undefined ? '₹' + payslipData.taxDeductions.toLocaleString('en-IN', {minimumFractionDigits: 2}) : 'Loading...'" readonly>
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label"><strong>Other Deductions:</strong></label>
+                <input type="text" class="form-control" [value]="payslipData && payslipData.otherDeductions !== undefined ? '₹' + payslipData.otherDeductions.toLocaleString('en-IN', {minimumFractionDigits: 2}) : 'Loading...'" readonly>
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label"><strong>Total Deductions:</strong></label>
+                <input type="text" class="form-control bg-danger text-white fw-bold" [value]="payslipData && payslipData.totalDeductions !== undefined ? '₹' + payslipData.totalDeductions.toLocaleString('en-IN', {minimumFractionDigits: 2}) : 'Loading...'" readonly>
+              </div>
+            </div>
+
+            <!-- Net Salary Section -->
+            <div class="row mb-4">
+              <div class="col-12">
+                <h6 class="text-primary mb-3">💵 Final Amount</h6>
+              </div>
+              <div class="col-md-12 mb-3">
+                <label class="form-label"><strong>Net Salary:</strong></label>
+                <input type="text" class="form-control bg-primary text-white fw-bold fs-5 text-center" [value]="payslipData && payslipData.netSalary !== undefined ? '₹' + payslipData.netSalary.toLocaleString('en-IN', {minimumFractionDigits: 2}) : 'Loading...'" readonly>
+              </div>
+            </div>
+
+            <!-- Download Button -->
+            <div class="row" *ngIf="payslipData">
+              <div class="col-12 text-center">
+                <button type="button" class="btn btn-success btn-lg" (click)="downloadPayslip()">
+                  <i class="fas fa-download me-2"></i>Download PDF
+                </button>
+              </div>
+            </div>
+          </form>
+          </div>
+        </div>
+      </div>
+    </main>
+
+  </div>
+</div>

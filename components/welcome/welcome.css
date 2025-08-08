@@ -1,0 +1,32 @@
+body {
+  background: linear-gradient(to right, #e0eafc, #cfdef3);
+  font-family: 'Segoe UI', sans-serif;
+}
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 1rem;
+  padding: 2rem;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 1rem 2rem rgba(0, 0, 0, 0.1);
+  transition: transform 0.4s ease;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+}
+
+.glass-card:hover {
+  transform: translateY(-5px);
+}
+
+.user-icon {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  border: 3px solid #6c757d;
+  object-fit: cover;
+}
+
+.modern-btn {
+  background-color: #6c63ff;
+  color: #fff;
+  padding: 0.6rem
+}

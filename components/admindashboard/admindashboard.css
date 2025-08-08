@@ -1,0 +1,142 @@
+body {
+    background-color: #f8f9fa;
+  }
+  
+  .card {
+    border-radius: 10px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  
+  .card:hover {
+    transform: scale(1.02);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+  }
+  
+  .dashboard-card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  
+  .dashboard-card:hover {
+    transform: scale(1.05);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+  }
+  
+  .bg-primary {
+    background: linear-gradient(135deg, #007bff, #0056b3);
+  }
+  
+  .bg-success {
+    background: linear-gradient(135deg, #28a745, #218838);
+  }
+  
+  .bg-warning {
+    background: linear-gradient(135deg, #ffc107, #e0a800);
+  }
+  
+  .bg-info {
+    background: linear-gradient(135deg, #17a2b8, #138496);
+  }
+  
+  .quick-link a {
+    display: block;
+    padding: 6px 0;
+    color: #007bff;
+    font-weight: 500;
+    transition: color 0.2s ease;
+  }
+  
+  .quick-link a:hover {
+    color: #0056b3;
+    text-decoration: underline;
+  }
+  
+  /* Loading spinner animation */
+  .spin {
+    animation: spin 1s linear infinite;
+  }
+  
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+  
+  /* Connection status styles */
+  .text-success {
+    color: #28a745 !important;
+  }
+  
+  .text-danger {
+    color: #dc3545 !important;
+  }
+  
+  /* Alert styles */
+  .alert {
+    border-radius: 8px;
+  }
+  
+  .alert-danger {
+    border-left: 4px solid #dc3545;
+  }
+  
+  /* Navigation improvements */
+  .nav-link {
+    transition: background-color 0.2s ease;
+  }
+  
+  .nav-link:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+  }
+  
+  /* Button improvements */
+  .btn {
+    transition: all 0.2s ease;
+  }
+  
+  .btn:hover {
+    transform: translateY(-1px);
+  }
+  
+  /* Card header improvements */
+  .card-header {
+    border-bottom: 2px solid rgba(0, 0, 0, 0.1);
+  }
+  
+  /* System status card */
+  .border-warning {
+    border-color: #ffc107 !important;
+    border-width: 2px !important;
+  }
+  
+  /* Responsive improvements */
+  @media (max-width: 768px) {
+    .dashboard-card {
+      margin-bottom: 1rem;
+    }
+    
+    .d-flex.justify-content-between {
+      flex-direction: column;
+      align-items: flex-start !important;
+    }
+    
+    .d-flex.justify-content-between > div:last-child {
+      margin-top: 1rem;
+    }
+  }
+  
+  /* Loading state improvements */
+  .spinner-border {
+    width: 3rem;
+    height: 3rem;
+  }
+  
+  /* Error state improvements */
+  .btn-outline-danger {
+    border-color: #dc3545;
+    color: #dc3545;
+  }
+  
+  .btn-outline-danger:hover {
+    background-color: #dc3545;
+    color: white;
+  }

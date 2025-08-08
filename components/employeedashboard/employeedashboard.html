@@ -1,0 +1,76 @@
+<div class="container-fluid">
+  <div class="row min-vh-100">
+
+    <!-- Sidebar -->
+    <nav class="col-md-3 col-lg-2 d-md-block bg-primary text-white sidebar py-4 shadow-sm">
+      <div class="position-sticky">
+        <h4 class="text-center mb-4">Employee Panel</h4>
+        <ul class="nav flex-column px-3">
+          <li class="nav-item mb-3">
+            <a class="nav-link text-white" routerLink="/employeedashurl">🏠 Dashboard</a>
+          </li>
+          <li class="nav-item mb-3">
+            <a class="nav-link text-white" routerLink="/myprofileurl">👤 My Profile</a>
+          </li>
+          <li class="nav-item mb-3">
+            <a class="nav-link text-white" routerLink="/leaveurl">📝 Leave</a>
+          </li>
+          <li class="nav-item mb-3">
+            <a class="nav-link text-white" routerLink="/salaryurl">💰 Salary</a>
+          </li>
+          <li class="nav-item mb-3">
+            <a class="nav-link text-white" routerLink="/settingsurl">⚙️ Settings</a>
+          </li>
+          <li class="nav-item mb-3">
+            <a class="nav-link text-white" (click)="logout()">🚪 Logout</a>
+          </li>
+        </ul>
+      </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="col-md-9 col-lg-10 px-4 py-4">
+      <h3>Welcome, {{ employee.empName }} 👋</h3>
+      <p class="text-muted">Here is a quick summary of your profile and activities.</p>
+
+      <div class="row g-4 my-4">
+        <div class="col-md-3">
+          <div class="card text-white bg-info shadow-sm">
+            <div class="card-body">
+              <h5 class="card-title">Leaves Remaining</h5>
+              <p class="card-text fs-4">{{ employee.leavesLeft || 12 }}</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-3">
+          <div class="card text-white bg-success shadow-sm">
+            <div class="card-body">
+              <h5 class="card-title">Last Salary</h5>
+              <p class="card-text fs-4">₹{{ employee.salary }}</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-3">
+          <div class="card text-white bg-warning shadow-sm">
+            <div class="card-body">
+              <h5 class="card-title">Department</h5>
+              <p class="card-text fs-5">{{ employee.department.deptName }}</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-3">
+          <div class="card text-white bg-danger shadow-sm">
+            <div class="card-body">
+              <h5 class="card-title">Joining Date</h5>
+              <p class="card-text fs-6">{{ employee.joiningDate }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+  </div>
+</div>

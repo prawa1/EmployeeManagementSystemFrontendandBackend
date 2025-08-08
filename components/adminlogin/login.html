@@ -1,0 +1,67 @@
+<!-- Admin Login with Hardcoded Credentials -->
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-md-6">
+      <h3 class="text-center mb-4">Admin Login</h3>
+    
+      
+      <form #loginForm="ngForm" (ngSubmit)="onLogin()">
+
+        <!-- Username -->
+        <div class="mb-3">
+          <label for="username" class="form-label">Username</label>
+          <input 
+            type="text" 
+            id="username" 
+            name="username" 
+            [(ngModel)]="loginData.username" 
+            (input)="onInputChange()"
+            class="form-control" 
+            [class.is-invalid]="loginError"
+            placeholder="Enter admin username"
+            required
+          />
+        </div>
+
+        <!-- Password -->
+        <div class="mb-3">
+          <label for="password" class="form-label">Password</label>
+          <input 
+            type="password" 
+            id="password" 
+            name="password" 
+            [(ngModel)]="loginData.password" 
+            (input)="onInputChange()"
+            class="form-control" 
+            [class.is-invalid]="loginError"
+            placeholder="Enter admin password"
+            required
+          />
+        </div>
+
+        <!-- Error Message -->
+        <div *ngIf="loginError" class="alert alert-danger mb-3">
+          {{ loginError }}
+        </div>
+
+        <!-- Login Button -->
+        <button 
+          type="submit" 
+          class="btn btn-primary w-100" 
+          [disabled]="loginForm.invalid || isLoading"
+        >
+          <span *ngIf="isLoading" class="spinner-border spinner-border-sm me-2" role="status"></span>
+          {{ isLoading ? 'Logging in...' : 'Login' }}
+        </button>
+        <a routerLink="" class="btn btn-primary w-100">Home</a>
+      </form>
+      
+      <!-- Additional Info -->
+      <div class="text-center mt-3">
+        <small class="text-muted">
+          Use the hardcoded credentials above to access the admin dashboard
+        </small>
+      </div>
+    </div>
+  </div>
+</div>

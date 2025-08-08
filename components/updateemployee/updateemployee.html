@@ -1,0 +1,328 @@
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary px-4 mb-4">
+  <a class="navbar-brand" routerLink="/admindashurl">Admin Panel</a>
+  <button
+    class="navbar-toggler"
+    type="button"
+    data-bs-toggle="collapse"
+    data-bs-target="#navbarNav"
+  >
+    <span class="navbar-toggler-icon"></span>
+  </button>
+  <div class="collapse navbar-collapse" id="navbarNav">
+    <ul class="navbar-nav me-auto">
+      <li class="nav-item"><a class="nav-link" routerLink="/admindashurl">Dashboard</a></li>
+      <li class="nav-item"><a class="nav-link" routerLink="/adminregisterurl">Register Employee</a></li>
+      <li class="nav-item"><a class="nav-link" routerLink="/manageleaveurl">Manage Leave</a></li>
+      <li class="nav-item"><a class="nav-link" routerLink="/viewemployeeurl">View Employee</a></li>
+    </ul>
+    <button class="btn btn-light" (click)="logout()" type="button">Logout</button>
+  </div>
+</nav>
+
+<!-- Update Employee Section -->
+<div class="container mt-4">
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+      <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+          <div class="d-flex justify-content-between align-items-center">
+            <h4 class="mb-0">
+              <i class="fas fa-user-edit me-2"></i>Update Employee
+              <span *ngIf="employeeId" class="badge bg-light text-dark ms-2">ID: {{employeeId}}</span>
+            </h4>
+            <div>
+              <button class="btn btn-outline-light btn-sm" (click)="goBack()">
+                <i class="fas fa-arrow-left me-1"></i>Back to List
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card-body">
+          <!-- Fetch Employee Data Button -->
+          <div class="mb-4 text-center">
+            <button 
+              class="btn btn-primary btn-lg" 
+              (click)="fetchEmployeeData()"
+              *ngIf="employeeId">
+              <i class="fas fa-download me-2"></i>Fetch Employee Data
+            </button>
+            <p class="text-muted mt-2" *ngIf="employeeId">
+              Click the button above to load employee data for ID: {{employeeId}}
+            </p>
+            <div class="alert alert-warning" *ngIf="!employeeId">
+              <i class="fas fa-exclamation-triangle me-2"></i>
+              No employee ID provided. Please navigate from the employee list or provide an employee ID in the URL.
+            </div>
+          </div>
+
+          <!-- Error Message Display -->
+          <div *ngIf="submitError" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            {{ submitError }}
+            <button type="button" class="btn-close" (click)="submitError = ''" aria-label="Close"></button>
+          </div>
+
+          <!-- Success Message Display -->
+          <div *ngIf="submitSuccess" class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle me-2"></i>
+            Employee data loaded successfully!
+            <button type="button" class="btn-close" (click)="submitSuccess = false" aria-label="Close"></button>
+          </div>
+
+          <!-- Employee Information Display -->
+          <div *ngIf="originalEmployee" class="alert alert-info mb-4">
+            <h6><i class="fas fa-info-circle me-2"></i>Current Employee Information</h6>
+            <div class="row">
+              <div class="col-md-4">
+                <strong>Employee ID:</strong> {{ originalEmployee.empId }}<br>
+                <strong>Name:</strong> {{ originalEmployee.empName }}<br>
+                <strong>Email:</strong> {{ originalEmployee.email }}<br>
+                <strong>Phone:</strong> {{ originalEmployee.phoneNo }}
+              </div>
+              <div class="col-md-4">
+                <strong>Role:</strong> {{ originalEmployee.role }}<br>
+                <strong>Department:</strong> {{ originalEmployee.department?.deptName || 'N/A' }}<br>
+                <strong>Manager ID:</strong> {{ originalEmployee.managerId }}<br>
+                <strong>Salary:</strong> {{ originalEmployee.salary | currency }}
+              </div>
+              <div class="col-md-4">
+                <strong>Gender:</strong> {{ originalEmployee.gender }}<br>
+                <strong>Joining Date:</strong> {{ originalEmployee.joiningDate }}<br>
+                <strong>Address:</strong> {{ originalEmployee.address }}
+              </div>
+            </div>
+            <small class="text-muted">
+              <i class="fas fa-edit me-1"></i>
+              Update any field below. Only changed fields will be updated in the database.
+            </small>
+          </div>
+
+          <!-- Update Form -->
+          <form [formGroup]="updateForm" (ngSubmit)="updateEmployee()">
+            
+            <!-- Read-only Fields Section -->
+            <div class="row mb-4">
+              <div class="col-12">
+                <h6 class="text-muted mb-3"><i class="fas fa-lock me-2"></i>Read-Only Information</h6>
+              </div>
+              
+              <!-- Employee ID Field (Read-only) -->
+              <div class="col-md-4 mb-3">
+                <label class="form-label">Employee ID</label>
+                <input 
+                  type="text" 
+                  formControlName="empId"
+                  class="form-control"
+                  readonly
+                  style="background-color: #f8f9fa; cursor: not-allowed;">
+                <div class="form-text">Employee ID cannot be changed</div>
+              </div>
+
+              <!-- Department Field (Read-only) -->
+              <div class="col-md-4 mb-3">
+                <label class="form-label">Department</label>
+                <input 
+                  type="text" 
+                  formControlName="department"
+                  class="form-control"
+                  readonly
+                  style="background-color: #f8f9fa; cursor: not-allowed;">
+                <div class="form-text">Department assignment is managed separately</div>
+              </div>
+
+              <!-- Joining Date Field (Read-only) -->
+              <div class="col-md-4 mb-3">
+                <label class="form-label">Joining Date</label>
+                <input 
+                  type="text" 
+                  formControlName="joiningDate"
+                  class="form-control"
+                  readonly
+                  style="background-color: #f8f9fa; cursor: not-allowed;">
+                <div class="form-text">Joining date cannot be modified</div>
+              </div>
+            </div>
+
+            <!-- Editable Fields Section -->
+            <div class="row mb-4">
+              <div class="col-12">
+                <h6 class="text-primary mb-3"><i class="fas fa-edit me-2"></i>Editable Information</h6>
+                <p class="text-muted small mb-3">Update any field below. Only changed fields will be updated in the database.</p>
+              </div>
+
+              <!-- Employee Name Field -->
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Employee Name</label>
+                <input 
+                  type="text" 
+                  formControlName="empName" 
+                  class="form-control"
+                  [class.is-invalid]="isFieldInvalid('empName')"
+                  [class.is-valid]="isFieldValid('empName')"
+                  placeholder="Enter employee name">
+                <div class="invalid-feedback" *ngIf="isFieldInvalid('empName')">
+                  {{ getFieldError('empName') }}
+                </div>
+              </div>
+
+              <!-- Phone Number Field -->
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Phone Number</label>
+                <input 
+                  type="tel" 
+                  formControlName="phoneNo" 
+                  class="form-control"
+                  [class.is-invalid]="isFieldInvalid('phoneNo')"
+                  [class.is-valid]="isFieldValid('phoneNo')"
+                  placeholder="Enter 10-digit phone number">
+                <div class="invalid-feedback" *ngIf="isFieldInvalid('phoneNo')">
+                  {{ getFieldError('phoneNo') }}
+                </div>
+                <div class="form-text">Enter 10-digit phone number without spaces or dashes</div>
+              </div>
+
+              <!-- Email Field -->
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Email Address</label>
+                <input 
+                  type="email" 
+                  formControlName="email" 
+                  class="form-control"
+                  [class.is-invalid]="isFieldInvalid('email')"
+                  [class.is-valid]="isFieldValid('email')"
+                  placeholder="Enter email address">
+                <div class="invalid-feedback" *ngIf="isFieldInvalid('email')">
+                  {{ getFieldError('email') }}
+                </div>
+              </div>
+
+              <!-- Role Field -->
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Role</label>
+                <input 
+                  type="text" 
+                  formControlName="role" 
+                  class="form-control"
+                  [class.is-invalid]="isFieldInvalid('role')"
+                  [class.is-valid]="isFieldValid('role')"
+                  placeholder="Enter employee role">
+                <div class="invalid-feedback" *ngIf="isFieldInvalid('role')">
+                  {{ getFieldError('role') }}
+                </div>
+              </div>
+
+              <!-- Salary Field -->
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Salary</label>
+                <input 
+                  type="number" 
+                  formControlName="salary" 
+                  class="form-control"
+                  [class.is-invalid]="isFieldInvalid('salary')"
+                  [class.is-valid]="isFieldValid('salary')"
+                  placeholder="Enter salary amount"
+                  min="10000"
+                  max="2500000">
+                <div class="invalid-feedback" *ngIf="isFieldInvalid('salary')">
+                  {{ getFieldError('salary') }}
+                </div>
+                <div class="form-text">Salary range: ₹10,000 - ₹25,00,000</div>
+              </div>
+
+              <!-- Manager ID Field -->
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Manager ID</label>
+                <input 
+                  type="number" 
+                  formControlName="managerId" 
+                  class="form-control"
+                  [class.is-invalid]="isFieldInvalid('managerId')"
+                  [class.is-valid]="isFieldValid('managerId')"
+                  placeholder="Enter manager employee ID">
+                <div class="invalid-feedback" *ngIf="isFieldInvalid('managerId')">
+                  {{ getFieldError('managerId') }}
+                </div>
+              </div>
+
+              <!-- Gender Field -->
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Gender</label>
+                <select 
+                  formControlName="gender" 
+                  class="form-select"
+                  [class.is-invalid]="isFieldInvalid('gender')"
+                  [class.is-valid]="isFieldValid('gender')">
+                  <option value="">Select Gender</option>
+                  <option value="Male">Male</option>
+                  <option value="Female">Female</option>
+                  <option value="Other">Other</option>
+                </select>
+                <div class="invalid-feedback" *ngIf="isFieldInvalid('gender')">
+                  {{ getFieldError('gender') }}
+                </div>
+              </div>
+
+              <!-- Address Field -->
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Address</label>
+                <textarea 
+                  formControlName="address" 
+                  class="form-control"
+                  [class.is-invalid]="isFieldInvalid('address')"
+                  [class.is-valid]="isFieldValid('address')"
+                  placeholder="Enter complete address"
+                  rows="3"></textarea>
+                <div class="invalid-feedback" *ngIf="isFieldInvalid('address')">
+                  {{ getFieldError('address') }}
+                </div>
+              </div>
+
+              <!-- Password Field -->
+              <div class="col-md-6 mb-3">
+                <label class="form-label">New Password</label>
+                <input 
+                  type="password" 
+                  formControlName="password" 
+                  class="form-control"
+                  [class.is-invalid]="isFieldInvalid('password')"
+                  [class.is-valid]="isFieldValid('password')"
+                  placeholder="Enter new password">
+                <div class="invalid-feedback" *ngIf="isFieldInvalid('password')">
+                  {{ getFieldError('password') }}
+                </div>
+                <div class="form-text">
+                  Password must start with lowercase, then uppercase, then 8-10 digits (e.g., aA12345678)
+                </div>
+              </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="d-flex justify-content-between">
+              <div>
+                <button 
+                  type="button" 
+                  class="btn btn-outline-secondary me-2" 
+                  (click)="resetForm()">
+                  <i class="fas fa-undo me-1"></i>Reset Form
+                </button>
+                <button 
+                  type="button" 
+                  class="btn btn-outline-primary" 
+                  (click)="goBack()">
+                  <i class="fas fa-arrow-left me-1"></i>Cancel
+                </button>
+              </div>
+              <button 
+                type="submit" 
+                class="btn btn-success">
+                <i class="fas fa-save me-1"></i>Update Employee
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

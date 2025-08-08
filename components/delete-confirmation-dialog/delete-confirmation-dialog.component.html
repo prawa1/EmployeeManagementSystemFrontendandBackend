@@ -1,0 +1,83 @@
+<!-- Modal backdrop -->
+<div class="modal-backdrop" *ngIf="isVisible" (click)="onCancel()"></div>
+
+<!-- Modal dialog -->
+<div class="modal fade show" [class.d-block]="isVisible" tabindex="-1" role="dialog" *ngIf="isVisible">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">
+          <i class="fas fa-exclamation-triangle text-warning me-2"></i>
+          Confirm Employee Deletion
+        </h5>
+        <button type="button" class="btn-close" (click)="onCancel()"></button>
+      </div>
+
+      <div class="modal-body">
+        <div class="employee-details mb-3">
+          <h6 class="fw-bold mb-3">Employee Details</h6>
+          <div class="row mb-2">
+            <div class="col-4 fw-semibold">Name:</div>
+            <div class="col-8">{{ data.employee.empName }}</div>
+          </div>
+          <div class="row mb-2">
+            <div class="col-4 fw-semibold">Email:</div>
+            <div class="col-8">{{ data.employee.email }}</div>
+          </div>
+          <div class="row mb-2">
+            <div class="col-4 fw-semibold">Phone:</div>
+            <div class="col-8">{{ data.employee.phoneNo }}</div>
+          </div>
+          <div class="row mb-2">
+            <div class="col-4 fw-semibold">Role:</div>
+            <div class="col-8">{{ data.employee.role }}</div>
+          </div>
+          <div class="row mb-2" *ngIf="data.employee.department">
+            <div class="col-4 fw-semibold">Department:</div>
+            <div class="col-8">{{ data.employee.department.deptName }}</div>
+          </div>
+        </div>
+
+        <div class="alert alert-danger" *ngIf="data.hasDependencies">
+          <div class="d-flex align-items-start">
+            <i class="fas fa-times-circle text-danger me-2 mt-1"></i>
+            <div>
+              <h6 class="alert-heading mb-2">Cannot Delete Employee</h6>
+              <p class="mb-2">{{ getDependencyWarningMessage() }}</p>
+              <p class="mb-0 fst-italic text-muted">
+                Please remove or reassign these records before attempting to delete this employee.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="alert alert-warning" *ngIf="!data.hasDependencies">
+          <div class="d-flex align-items-start">
+            <i class="fas fa-exclamation-triangle text-warning me-2 mt-1"></i>
+            <div>
+              <h6 class="alert-heading mb-2">Are you sure you want to delete this employee?</h6>
+              <p class="mb-0">This action cannot be undone. The employee record will be permanently removed from the system.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button 
+          type="button" 
+          class="btn btn-secondary" 
+          (click)="onCancel()">
+          {{ data.hasDependencies ? 'Close' : 'Cancel' }}
+        </button>
+        <button 
+          type="button" 
+          class="btn btn-danger" 
+          (click)="onConfirm()" 
+          *ngIf="!data.hasDependencies">
+          <i class="fas fa-trash me-1"></i>
+          Delete Employee
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

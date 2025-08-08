@@ -1,0 +1,1 @@
+export var endpointurl:string="http://localhost:8082"

@@ -1,0 +1,297 @@
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary px-4 mb-4">
+  <a class="navbar-brand" routerLink="/admindashurl">Admin Panel</a>
+  <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+  <div class="collapse navbar-collapse" id="navbarNav">
+    <ul class="navbar-nav me-auto">
+      <li class="nav-item"><a class="nav-link" routerLink="/admindashurl">Dashboard</a></li>
+      <li class="nav-item"><a class="nav-link" routerLink="/adminregisterurl">Register Employee</a></li>
+      <li class="nav-item"><a class="nav-link" routerLink="/manageleaveurl">Manage Leave</a></li>
+      <li class="nav-item"><a class="nav-link" routerLink="/viewemployeeurl">View Employee</a></li>
+    </ul>
+    <button class="btn btn-light" (click)="logout()">Logout</button>
+  </div>
+</nav>
+
+<!-- Centered Card Container -->
+<div class="container py-4 d-flex justify-content-center">
+  <div class="card shadow" style="max-width: 600px; width: 100%;">
+    <div class="card-header bg-primary text-white">
+      <h4 class="mb-0">Register New Employee</h4>
+    </div>
+    <div class="card-body">
+
+      <!-- Success Alert -->
+      <div *ngIf="submitSuccess" class="alert alert-success alert-dismissible fade show">
+        <div class="d-flex align-items-start">
+          <i class="fas fa-check-circle me-3 mt-1" style="font-size: 1.2em; color: #198754;"></i>
+          <div class="flex-grow-1">
+            <h6 class="alert-heading mb-2">Registration Successful!</h6>
+            <p class="mb-2">The new employee has been registered successfully and added to the system.</p>
+            <div class="mt-3">
+              <button 
+                type="button" 
+                class="btn btn-success me-2"
+                (click)="goToEmployeeList()">
+                <i class="fas fa-list me-1"></i>
+                View Employee List
+              </button>
+              <button 
+                type="button" 
+                class="btn btn-outline-success me-2"
+                (click)="registerAnother()">
+                <i class="fas fa-plus me-1"></i>
+                Register Another Employee
+              </button>
+            </div>
+            <div class="mt-2">
+              <small class="text-muted">
+                <i class="fas fa-clock me-1"></i>
+                Auto-redirecting to employee list in 4 seconds...
+              </small>
+            </div>
+          </div>
+          <button 
+            type="button" 
+            class="btn-close" 
+            (click)="submitSuccess = false"
+            aria-label="Close">
+          </button>
+        </div>
+      </div>
+      <div *ngIf="submitError" class="alert alert-danger alert-dismissible fade show">
+        <i class="fas fa-exclamation-triangle me-2"></i>
+        {{ submitError }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      </div>
+
+      <!-- Loading indicator for departments -->
+      <div *ngIf="isLoadingDepartments" class="alert alert-info">
+        <i class="fas fa-spinner fa-spin me-2"></i>
+        Loading departments...
+      </div>
+
+      <!-- Reactive Form -->
+      <form [formGroup]="employeeForm" (ngSubmit)="registerEmployee()" novalidate>
+
+        <!-- Name Field -->
+        <div class="mb-3">
+          <label class="form-label">Name <span class="text-danger">*</span></label>
+          <input 
+            type="text" 
+            formControlName="empName" 
+            class="form-control"
+            [class.is-invalid]="isFieldInvalid('empName')"
+            [class.is-valid]="isFieldValid('empName')"
+            placeholder="Enter full name">
+          <div class="invalid-feedback" *ngIf="isFieldInvalid('empName')">
+            {{ getFieldError('empName') }}
+          </div>
+        </div>
+
+        <!-- Phone Number Field -->
+        <div class="mb-3">
+          <label class="form-label">Phone Number <span class="text-danger">*</span></label>
+          <input 
+            type="tel" 
+            formControlName="phoneNo" 
+            class="form-control"
+            [class.is-invalid]="isFieldInvalid('phoneNo')"
+            [class.is-valid]="isFieldValid('phoneNo')"
+            placeholder="Enter 10-digit phone number"
+            maxlength="10">
+          <div class="invalid-feedback" *ngIf="isFieldInvalid('phoneNo')">
+            {{ getFieldError('phoneNo') }}
+          </div>
+          <div class="form-text">Enter exactly 10 digits without spaces or special characters</div>
+        </div>
+
+        <!-- Email Field -->
+        <div class="mb-3">
+          <label class="form-label">Email <span class="text-danger">*</span></label>
+          <input 
+            type="email" 
+            formControlName="email" 
+            class="form-control"
+            [class.is-invalid]="isFieldInvalid('email')"
+            [class.is-valid]="isFieldValid('email')"
+            placeholder="Enter email address">
+          <div class="invalid-feedback" *ngIf="isFieldInvalid('email')">
+            {{ getFieldError('email') }}
+          </div>
+        </div>
+
+        <!-- Password Field -->
+        <div class="mb-3">
+          <label class="form-label">Password <span class="text-danger">*</span></label>
+          <input 
+            type="password" 
+            formControlName="password" 
+            class="form-control"
+            [class.is-invalid]="isFieldInvalid('password')"
+            [class.is-valid]="isFieldValid('password')"
+            placeholder="Enter password (8-10 characters)">
+          <div class="invalid-feedback" *ngIf="isFieldInvalid('password')">
+            {{ getFieldError('password') }}
+          </div>
+          <div class="form-text">Password must start with lowercase, then uppercase, then 8-10 digits (e.g., aA12345678)</div>
+        </div>
+
+        <!-- Role Field -->
+        <div class="mb-3">
+          <label class="form-label">Role <span class="text-danger">*</span></label>
+          <input 
+            type="text" 
+            formControlName="role" 
+            class="form-control"
+            [class.is-invalid]="isFieldInvalid('role')"
+            [class.is-valid]="isFieldValid('role')"
+            placeholder="Enter employee role (e.g., Developer, Manager)">
+          <div class="invalid-feedback" *ngIf="isFieldInvalid('role')">
+            {{ getFieldError('role') }}
+          </div>
+        </div>
+
+        <!-- Manager ID Field -->
+        <div class="mb-3">
+          <label class="form-label">Manager ID <span class="text-danger">*</span></label>
+          <input 
+            type="number" 
+            formControlName="managerId" 
+            class="form-control"
+            [class.is-invalid]="isFieldInvalid('managerId')"
+            [class.is-valid]="isFieldValid('managerId')"
+            placeholder="Enter manager's employee ID"
+            min="1">
+          <div class="invalid-feedback" *ngIf="isFieldInvalid('managerId')">
+            {{ getFieldError('managerId') }}
+          </div>
+          <div class="form-text">Enter the employee ID of the direct manager</div>
+        </div>
+
+        <!-- Salary Field -->
+        <div class="mb-3">
+          <label class="form-label">Salary <span class="text-danger">*</span></label>
+          <input 
+            type="number" 
+            formControlName="salary" 
+            class="form-control"
+            [class.is-invalid]="isFieldInvalid('salary')"
+            [class.is-valid]="isFieldValid('salary')"
+            placeholder="Enter annual salary"
+            min="10000" 
+            max="10000000"
+            step="1000">
+          <div class="invalid-feedback" *ngIf="isFieldInvalid('salary')">
+            {{ getFieldError('salary') }}
+          </div>
+          <div class="form-text">Enter annual salary (minimum: ₹10,000, maximum: ₹10,000,000)</div>
+        </div>
+
+        <!-- Address Field -->
+        <div class="mb-3">
+          <label class="form-label">Address <span class="text-danger">*</span></label>
+          <textarea 
+            formControlName="address" 
+            class="form-control"
+            [class.is-invalid]="isFieldInvalid('address')"
+            [class.is-valid]="isFieldValid('address')"
+            placeholder="Enter complete address"
+            rows="3"
+            maxlength="500"></textarea>
+          <div class="invalid-feedback" *ngIf="isFieldInvalid('address')">
+            {{ getFieldError('address') }}
+          </div>
+          <div class="form-text">Enter complete address (minimum 10 characters)</div>
+        </div>
+
+        <!-- Joining Date Field -->
+        <div class="mb-3">
+          <label class="form-label">Date of Joining <span class="text-danger">*</span></label>
+          <input 
+            type="date" 
+            formControlName="joiningDate" 
+            class="form-control"
+            [class.is-invalid]="isFieldInvalid('joiningDate')"
+            [class.is-valid]="isFieldValid('joiningDate')">
+          <div class="invalid-feedback" *ngIf="isFieldInvalid('joiningDate')">
+            {{ getFieldError('joiningDate') }}
+          </div>
+          <div class="form-text">Joining date cannot be in the future</div>
+        </div>
+
+        <!-- Gender Field -->
+        <div class="mb-3">
+          <label class="form-label">Gender <span class="text-danger">*</span></label>
+          <select 
+            formControlName="gender" 
+            class="form-select"
+            [class.is-invalid]="isFieldInvalid('gender')"
+            [class.is-valid]="isFieldValid('gender')">
+            <option value="">Select Gender</option>
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+            <option value="Other">Other</option>
+          </select>
+          <div class="invalid-feedback" *ngIf="isFieldInvalid('gender')">
+            {{ getFieldError('gender') }}
+          </div>
+        </div>
+
+        <!-- Department Field -->
+        <div class="mb-3">
+          <label class="form-label">Department <span class="text-danger">*</span></label>
+          <select 
+            formControlName="departmentId" 
+            class="form-select"
+            [class.is-invalid]="isFieldInvalid('departmentId')"
+            [class.is-valid]="isFieldValid('departmentId')"
+            [disabled]="isLoadingDepartments">
+            <option value="">Select Department</option>
+            <option *ngFor="let dept of departments" [value]="dept.deptId">
+              {{ dept.deptName }}
+            </option>
+          </select>
+          <div class="invalid-feedback" *ngIf="isFieldInvalid('departmentId')">
+            {{ getFieldError('departmentId') }}
+          </div>
+          <div class="form-text" *ngIf="isLoadingDepartments">Loading departments...</div>
+        </div>
+
+        <!-- Photo Field -->
+        <div class="mb-3">
+          <label class="form-label">Photo (Optional)</label>
+          <input 
+            type="file" 
+            (change)="onFileSelected($event)" 
+            class="form-control"
+            accept="image/jpeg,image/jpg,image/png">
+          <div class="form-text">Upload a profile photo (JPEG, JPG, or PNG, max 5MB)</div>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="d-grid gap-2">
+          <button 
+            type="submit" 
+            class="btn btn-primary"
+            [disabled]="employeeForm.invalid || isLoading">
+            <span *ngIf="isLoading" class="spinner-border spinner-border-sm me-2"></span>
+            <i *ngIf="!isLoading" class="fas fa-user-plus me-2"></i>
+            {{ isLoading ? 'Registering...' : 'Register Employee' }}
+          </button>
+          <button 
+            type="button" 
+            class="btn btn-outline-secondary"
+            (click)="resetForm()"
+            [disabled]="isLoading">
+            <i class="fas fa-undo me-2"></i>
+            Reset Form
+          </button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+</div>

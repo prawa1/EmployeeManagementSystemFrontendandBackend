@@ -1,0 +1,437 @@
+
+<div class="container-fluid">
+  <!-- Skip link for screen readers -->
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+  
+  <div class="row min-vh-100">
+    
+    <!-- Sidebar -->
+    <nav class="col-md-3 col-lg-2 d-md-block bg-primary text-white sidebar py-4 shadow-sm" 
+         role="navigation" 
+         aria-label="Employee navigation menu">
+      <div class="position-sticky">
+        <h4 class="text-center mb-4" id="nav-heading">Employee Panel</h4>
+        <ul class="nav flex-column px-3" role="menubar" aria-labelledby="nav-heading">
+          <li class="nav-item mb-3" role="none">
+            <a class="nav-link text-white" 
+               routerLink="/employeedashurl" 
+               role="menuitem" 
+               aria-label="Go to Dashboard">🏠 Dashboard</a>
+          </li>
+          <li class="nav-item mb-3" role="none">
+            <a class="nav-link text-white" 
+               routerLink="/myprofileurl" 
+               role="menuitem" 
+               aria-label="Go to My Profile">👤 My Profile</a>
+          </li>
+          <li class="nav-item mb-3" role="none">
+            <a class="nav-link text-white" 
+               routerLink="/leaveurl" 
+               role="menuitem" 
+               aria-label="Go to Leave Management">📝 Leave</a>
+          </li>
+          <li class="nav-item mb-3" role="none">
+            <a class="nav-link text-white" 
+               routerLink="/salaryurl" 
+               role="menuitem" 
+               aria-label="Go to Salary Information">💰 Salary</a>
+          </li>
+          <li class="nav-item mb-3" role="none">
+            <a class="nav-link text-white active" 
+               routerLink="/settingsurl" 
+               role="menuitem" 
+               aria-current="page"
+               aria-label="Settings - Current page">⚙️ Settings</a>
+          </li>
+           <li class="nav-item mb-3" role="none">
+            <a class="nav-link text-white" 
+               (click)="logout()" 
+               (keydown.enter)="logout()" 
+               (keydown.space)="logout()"
+               role="menuitem" 
+               tabindex="0"
+               aria-label="Logout from application">🚪 Logout</a>
+          </li>
+        </ul>
+      </div>
+    </nav>
+
+    <!-- Settings Content -->
+    <main class="col-md-9 ms-sm-auto col-lg-10 px-md-5 py-4 bg-light" 
+          id="main-content" 
+          role="main" 
+          aria-labelledby="page-title">
+      <div class="container mt-4">
+        <h3 class="mb-4" id="page-title">⚙️ Employee Settings</h3>
+        
+        <!-- Loading Indicator -->
+        <div *ngIf="isLoading" 
+             class="d-flex justify-content-center align-items-center" 
+             style="min-height: 400px;"
+             role="status" 
+             aria-live="polite" 
+             aria-label="Loading employee data">
+          <div class="text-center">
+            <div class="spinner-border text-primary" role="status" aria-hidden="true">
+              <span class="sr-only">Loading...</span>
+            </div>
+            <div class="mt-3 text-muted">Loading employee data...</div>
+          </div>
+        </div>
+
+        <!-- Error Message -->
+        <div *ngIf="errorMessage && !isLoading" 
+             class="alert alert-danger text-center" 
+             role="alert" 
+             aria-live="assertive"
+             aria-labelledby="error-heading">
+          <i class="fas fa-exclamation-triangle me-2" aria-hidden="true"></i>
+          <span id="error-heading">{{ errorMessage }}</span>
+          <div class="mt-2">
+            <button type="button" 
+                    class="btn btn-primary btn-sm" 
+                    (click)="loadEmployeeData()"
+                    (keydown.enter)="loadEmployeeData()"
+                    aria-label="Retry loading employee data">
+              <i class="fas fa-redo me-1" aria-hidden="true"></i>Try Again
+            </button>
+          </div>
+        </div>
+        
+        <!-- Success/Error Notifications -->
+        <div *ngIf="notifications.success" 
+             class="alert alert-success alert-dismissible fade show" 
+             role="alert" 
+             aria-live="polite"
+             aria-labelledby="success-message">
+          <i class="fas fa-check-circle me-2" aria-hidden="true"></i>
+          <span id="success-message">{{ notifications.success }}</span>
+          <button type="button" 
+                  class="btn-close" 
+                  (click)="clearNotifications()"
+                  (keydown.enter)="clearNotifications()"
+                  aria-label="Close success notification"></button>
+        </div>
+        
+        <div *ngIf="notifications.error" 
+             class="alert alert-danger alert-dismissible fade show" 
+             role="alert" 
+             aria-live="assertive"
+             aria-labelledby="error-notification">
+          <i class="fas fa-exclamation-triangle me-2" aria-hidden="true"></i>
+          <span id="error-notification">{{ notifications.error }}</span>
+          <button type="button" 
+                  class="btn-close" 
+                  (click)="clearNotifications()"
+                  (keydown.enter)="clearNotifications()"
+                  aria-label="Close error notification"></button>
+          
+          <!-- Retry buttons for network/server errors -->
+          <div *ngIf="notifications.error.includes('Network error') || notifications.error.includes('timed out') || notifications.error.includes('Server error')" 
+               class="mt-2" 
+               role="group" 
+               aria-label="Retry options">
+            <button *ngIf="notifications.error.includes('remaining')" 
+                    type="button" 
+                    class="btn btn-outline-danger btn-sm me-2" 
+                    (click)="retryFieldSave('name')" 
+                    (keydown.enter)="retryFieldSave('name')"
+                    [disabled]="!editMode.name"
+                    aria-label="Retry saving name field">
+              <i class="fas fa-redo me-1" aria-hidden="true"></i>Retry Name Update
+            </button>
+            <button *ngIf="notifications.error.includes('remaining')" 
+                    type="button" 
+                    class="btn btn-outline-danger btn-sm" 
+                    (click)="retryFieldSave('phone')" 
+                    (keydown.enter)="retryFieldSave('phone')"
+                    [disabled]="!editMode.phone"
+                    aria-label="Retry saving phone number field">
+              <i class="fas fa-redo me-1" aria-hidden="true"></i>Retry Phone Update
+            </button>
+          </div>
+        </div>
+
+        <!-- Settings Form -->
+        <div *ngIf="!isLoading && !errorMessage" 
+             class="card shadow-lg" 
+             role="form" 
+             aria-labelledby="form-heading">
+          <div class="card-header bg-primary text-white">
+            <h5 class="mb-0" id="form-heading">Update Personal Information</h5>
+            <small class="text-light">You can edit your name and phone number below</small>
+          </div>
+          <div class="card-body">
+            
+            <!-- Employee Name Section -->
+            <fieldset class="row mb-4" aria-labelledby="name-section-heading">
+              <legend class="col-12">
+                <h6 class="text-primary mb-3" id="name-section-heading">Employee Name</h6>
+              </legend>
+              <div class="col-md-8">
+                <label class="form-label" for="employee-name-field" id="name-label">
+                  <strong>Name:</strong>
+                </label>
+                
+                <!-- Read Mode -->
+                <div *ngIf="!editMode.name" class="d-flex align-items-center" role="group" aria-labelledby="name-label">
+                  <input type="text" 
+                         id="employee-name-field"
+                         class="form-control me-3" 
+                         [value]="employee.empName || 'Loading...'" 
+                         readonly
+                         aria-label="Current employee name"
+                         aria-describedby="name-label">
+                  <button type="button" 
+                          class="btn btn-outline-primary btn-sm" 
+                          (click)="toggleEditMode('name')"
+                          (keydown.enter)="toggleEditMode('name')"
+                          aria-label="Edit employee name"
+                          aria-describedby="name-edit-help">
+                    <i class="fas fa-edit me-1" aria-hidden="true"></i>Edit
+                  </button>
+                  <span id="name-edit-help" class="sr-only">Press Enter or click to edit your name</span>
+                </div>
+                
+                <!-- Edit Mode -->
+                <div *ngIf="editMode.name" 
+                     [class.border-danger]="fieldErrors.name" 
+                     [class.p-2]="fieldErrors.name" 
+                     [class.rounded]="fieldErrors.name"
+                     role="group" 
+                     aria-labelledby="name-label"
+                     aria-describedby="name-validation-feedback name-edit-instructions">
+                  <div class="input-group mb-2">
+                    <input type="text" 
+                           id="employee-name-edit"
+                           class="form-control" 
+                           [(ngModel)]="editValues.name" 
+                           (input)="onNameInput()"
+                           (keydown.enter)="saveField('name')"
+                           (keydown.escape)="cancelEdit('name')"
+                           [class.is-invalid]="validationErrors.name || fieldErrors.name"
+                           [class.border-danger]="fieldErrors.name"
+                           placeholder="Enter your name"
+                           maxlength="30"
+                           autocomplete="name"
+                           aria-describedby="name-validation-feedback name-edit-instructions"
+                           aria-label="Edit employee name"
+                           [attr.aria-invalid]="validationErrors.name || fieldErrors.name ? 'true' : 'false'">
+                    <button type="button" 
+                            class="btn btn-success" 
+                            (click)="saveField('name')" 
+                            (keydown.enter)="saveField('name')"
+                            [disabled]="!editValues.name || validationErrors.name || saveLoading.name"
+                            aria-label="Save name changes"
+                            [attr.aria-describedby]="saveLoading.name ? 'name-saving-status' : null">
+                      <span *ngIf="saveLoading.name" 
+                            class="spinner-border spinner-border-sm me-1" 
+                            role="status" 
+                            aria-hidden="true"></span>
+                      <i *ngIf="!saveLoading.name" class="fas fa-check me-1" aria-hidden="true"></i>
+                      {{ saveLoading.name ? 'Saving...' : 'Save' }}
+                      <span *ngIf="saveLoading.name" id="name-saving-status" class="sr-only">Saving name in progress</span>
+                    </button>
+                    <button type="button" 
+                            class="btn btn-secondary" 
+                            (click)="cancelEdit('name')" 
+                            (keydown.enter)="cancelEdit('name')"
+                            [disabled]="saveLoading.name"
+                            aria-label="Cancel name editing">
+                      <i class="fas fa-times me-1" aria-hidden="true"></i>Cancel
+                    </button>
+                  </div>
+                  <div id="name-edit-instructions" class="sr-only">
+                    Press Enter to save, Escape to cancel. Name must be 2-30 characters with letters, spaces, hyphens, and apostrophes only.
+                  </div>
+                  <div id="name-validation-feedback" aria-live="polite">
+                    <div *ngIf="validationErrors.name" class="text-danger small" role="alert">
+                      <i class="fas fa-exclamation-circle me-1" aria-hidden="true"></i>{{ validationErrors.name }}
+                    </div>
+                    <div *ngIf="fieldErrors.name && !validationErrors.name" class="text-danger small" role="alert">
+                      <i class="fas fa-exclamation-triangle me-1" aria-hidden="true"></i>Error occurred while saving. Please try again.
+                    </div>
+                    <div *ngIf="!validationErrors.name && !fieldErrors.name && editValues.name && editValues.name.trim().length > 0" class="text-success small">
+                      <i class="fas fa-check-circle me-1" aria-hidden="true"></i>Name looks good!
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </fieldset>
+
+            <hr>
+
+            <!-- Phone Number Section -->
+            <fieldset class="row mb-4" aria-labelledby="phone-section-heading">
+              <legend class="col-12">
+                <h6 class="text-success mb-3" id="phone-section-heading">Phone Number</h6>
+              </legend>
+              <div class="col-md-8">
+                <label class="form-label" for="employee-phone-field" id="phone-label">
+                  <strong>Phone Number:</strong>
+                </label>
+                
+                <!-- Read Mode -->
+                <div *ngIf="!editMode.phone" class="d-flex align-items-center" role="group" aria-labelledby="phone-label">
+                  <input type="text" 
+                         id="employee-phone-field"
+                         class="form-control me-3" 
+                         [value]="employee.phoneNo || 'Loading...'" 
+                         readonly
+                         aria-label="Current phone number"
+                         aria-describedby="phone-label">
+                  <button type="button" 
+                          class="btn btn-outline-success btn-sm" 
+                          (click)="toggleEditMode('phone')"
+                          (keydown.enter)="toggleEditMode('phone')"
+                          aria-label="Edit phone number"
+                          aria-describedby="phone-edit-help">
+                    <i class="fas fa-edit me-1" aria-hidden="true"></i>Edit
+                  </button>
+                  <span id="phone-edit-help" class="sr-only">Press Enter or click to edit your phone number</span>
+                </div>
+                
+                <!-- Edit Mode -->
+                <div *ngIf="editMode.phone" 
+                     [class.border-danger]="fieldErrors.phone" 
+                     [class.p-2]="fieldErrors.phone" 
+                     [class.rounded]="fieldErrors.phone"
+                     role="group" 
+                     aria-labelledby="phone-label"
+                     aria-describedby="phone-validation-feedback phone-edit-instructions">
+                  <div class="input-group mb-2">
+                    <input type="tel" 
+                           id="employee-phone-edit"
+                           class="form-control" 
+                           [(ngModel)]="editValues.phone" 
+                           (input)="onPhoneInput()"
+                           (keydown.enter)="saveField('phone')"
+                           (keydown.escape)="cancelEdit('phone')"
+                           [class.is-invalid]="validationErrors.phone || fieldErrors.phone"
+                           [class.border-danger]="fieldErrors.phone"
+                           placeholder="Enter 10-digit phone number"
+                           maxlength="10"
+                           autocomplete="tel"
+                           aria-describedby="phone-validation-feedback phone-edit-instructions"
+                           aria-label="Edit phone number"
+                           [attr.aria-invalid]="validationErrors.phone || fieldErrors.phone ? 'true' : 'false'">
+                    <button type="button" 
+                            class="btn btn-success" 
+                            (click)="saveField('phone')" 
+                            (keydown.enter)="saveField('phone')"
+                            [disabled]="!editValues.phone || validationErrors.phone || saveLoading.phone"
+                            aria-label="Save phone number changes"
+                            [attr.aria-describedby]="saveLoading.phone ? 'phone-saving-status' : null">
+                      <span *ngIf="saveLoading.phone" 
+                            class="spinner-border spinner-border-sm me-1" 
+                            role="status" 
+                            aria-hidden="true"></span>
+                      <i *ngIf="!saveLoading.phone" class="fas fa-check me-1" aria-hidden="true"></i>
+                      {{ saveLoading.phone ? 'Saving...' : 'Save' }}
+                      <span *ngIf="saveLoading.phone" id="phone-saving-status" class="sr-only">Saving phone number in progress</span>
+                    </button>
+                    <button type="button" 
+                            class="btn btn-secondary" 
+                            (click)="cancelEdit('phone')" 
+                            (keydown.enter)="cancelEdit('phone')"
+                            [disabled]="saveLoading.phone"
+                            aria-label="Cancel phone number editing">
+                      <i class="fas fa-times me-1" aria-hidden="true"></i>Cancel
+                    </button>
+                  </div>
+                  <div id="phone-edit-instructions" class="sr-only">
+                    Press Enter to save, Escape to cancel. Phone number must be exactly 10 digits without spaces or special characters.
+                  </div>
+                  <div id="phone-validation-feedback" aria-live="polite">
+                    <div *ngIf="validationErrors.phone" class="text-danger small" role="alert">
+                      <i class="fas fa-exclamation-circle me-1" aria-hidden="true"></i>{{ validationErrors.phone }}
+                    </div>
+                    <div *ngIf="fieldErrors.phone && !validationErrors.phone" class="text-danger small" role="alert">
+                      <i class="fas fa-exclamation-triangle me-1" aria-hidden="true"></i>Error occurred while saving. Please try again.
+                    </div>
+                    <div *ngIf="!validationErrors.phone && !fieldErrors.phone && editValues.phone && editValues.phone.trim().length > 0" class="text-success small">
+                      <i class="fas fa-check-circle me-1" aria-hidden="true"></i>Phone number looks good!
+                    </div>
+                    <div *ngIf="!validationErrors.phone && !fieldErrors.phone && (!editValues.phone || editValues.phone.trim().length === 0)" class="text-muted small">
+                      <i class="fas fa-info-circle me-1" aria-hidden="true"></i>Enter exactly 10 digits without spaces or special characters
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </fieldset>
+
+            <hr>
+
+            <!-- Read-only Information Section -->
+            <fieldset class="row mb-4" aria-labelledby="readonly-section-heading">
+              <legend class="col-12">
+                <h6 class="text-info mb-3" id="readonly-section-heading">Other Information (Read-only)</h6>
+              </legend>
+              <div class="col-md-6 mb-3">
+                <label class="form-label" for="employee-id-field"><strong>Employee ID:</strong></label>
+                <input type="text" 
+                       id="employee-id-field"
+                       class="form-control bg-light" 
+                       [value]="employee.empId || 'Loading...'" 
+                       readonly
+                       aria-label="Employee ID - read only"
+                       tabindex="-1">
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label" for="employee-email-field"><strong>Email:</strong></label>
+                <input type="email" 
+                       id="employee-email-field"
+                       class="form-control bg-light" 
+                       [value]="employee.email || 'Loading...'" 
+                       readonly
+                       aria-label="Employee email - read only"
+                       tabindex="-1">
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label" for="employee-role-field"><strong>Role:</strong></label>
+                <input type="text" 
+                       id="employee-role-field"
+                       class="form-control bg-light" 
+                       [value]="employee.role || 'Loading...'" 
+                       readonly
+                       aria-label="Employee role - read only"
+                       tabindex="-1">
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label" for="employee-joining-date-field"><strong>Joining Date:</strong></label>
+                <input type="text" 
+                       id="employee-joining-date-field"
+                       class="form-control bg-light" 
+                       [value]="employee.joiningDate || 'Loading...'" 
+                       readonly
+                       aria-label="Employee joining date - read only"
+                       tabindex="-1">
+              </div>
+            </fieldset>
+
+            <!-- Help Section -->
+            <div class="alert alert-info" 
+                 role="region" 
+                 aria-labelledby="help-heading"
+                 aria-describedby="help-content">
+              <h6 id="help-heading">
+                <i class="fas fa-info-circle me-2" aria-hidden="true"></i>Settings Help
+              </h6>
+              <ul class="mb-0" id="help-content">
+                <li>Click the "Edit" button next to any field to modify it</li>
+                <li>Name must be 2-30 characters and contain only letters, spaces, hyphens, and apostrophes</li>
+                <li>Phone number must be exactly 10 digits</li>
+                <li>Changes are saved immediately when you click "Save"</li>
+                <li>Use "Cancel" to discard changes without saving</li>
+                <li>Press Enter to save changes, Escape to cancel editing</li>
+                <li>Use Tab to navigate between fields and buttons</li>
+              </ul>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </main>
+
+  </div>
+</div>

@@ -1,0 +1,130 @@
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary px-4 mb-4">
+  <a class="navbar-brand" roterLink="/admindashurl">Admin Panel</a>
+  <button
+    class="navbar-toggler"
+    type="button"
+    data-bs-toggle="collapse"
+    data-bs-target="#navbarNav"
+  >
+    <span class="navbar-toggler-icon"></span>
+  </button>
+  <div class="collapse navbar-collapse" id="navbarNav">
+    <ul class="navbar-nav me-auto">
+      <li class="nav-item"><a class="nav-link" routerLink="/admindashurl">Dashboard</a></li>
+      <li class="nav-item"><a class="nav-link" routerLink="/adminregisterurl">Register Employee</a></li>
+        <li class="nav-item"><a class="nav-link" routerLink="/manageleaveurl">Manage Leave</a></li>
+        <li class="nav-item"><a class="nav-link" routerLink="/viewemployeeurl">View Employee</a></li>
+    </ul>
+    <button class="btn btn-light" (click)="logout()" type="button">Logout</button>
+  </div>
+</nav>
+
+<!-- Manage Leave Section -->
+<div class="container mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h3 class="mb-0">Pending Leave Requests</h3>
+    <button class="btn btn-outline-primary" (click)="fetchAllPendingLeaves()" [disabled]="isLoading">
+      <i class="fas fa-sync-alt" [class.fa-spin]="isLoading"></i>
+      {{ isLoading ? 'Loading...' : 'Refresh' }}
+    </button>
+  </div>
+
+  <!-- Error Message Display -->
+  <div *ngIf="errorMessage" class="alert alert-danger alert-dismissible fade show" role="alert">
+    <i class="fas fa-exclamation-triangle me-2"></i>
+    {{ errorMessage }}
+    <button *ngIf="connectionError" class="btn btn-sm btn-outline-danger ms-2" (click)="retryConnection()">
+      Retry Connection
+    </button>
+    <button type="button" class="btn-close" (click)="errorMessage = ''" aria-label="Close"></button>
+  </div>
+
+  <!-- Loading Spinner -->
+  <div *ngIf="isLoading && !errorMessage" class="text-center py-4">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+    <p class="mt-2 text-muted">Loading pending leave requests...</p>
+  </div>
+
+  <!-- Leave Requests Table -->
+  <div *ngIf="!isLoading || errorMessage" class="table-responsive">
+    <table class="table table-bordered table-striped" *ngIf="pendingLeaves.length > 0; else noLeaves">
+      <thead class="table-dark">
+        <tr>
+          <th>Employee ID</th>
+          <th>Employee Name</th>
+          <th>Leave Type</th>
+          <th>From Date</th>
+          <th>To Date</th>
+          <th>Applied Date</th>
+          <th>Reason</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let leave of pendingLeaves | paginate:{itemsPerPage: count, currentPage: p}">
+          <td>{{ getEmployeeId(leave) }}</td>
+          <td>
+            <strong>{{ getEmployeeName(leave) }}</strong>
+            <br>
+            <small class="text-muted">{{ leave.employee && leave.employee.email ? leave.employee.email : 'N/A' }}</small>
+          </td>
+          <td>
+            <span class="badge bg-info">{{ leave.leaveType || 'General' }}</span>
+          </td>
+          <td>{{ getFormattedDate(leave.startDate) }}</td>
+          <td>{{ getFormattedDate(leave.endDate) }}</td>
+          <td>{{ getFormattedDate(leave.appliedDate) }}</td>
+          <td>
+            <div class="reason-cell" [title]="leave.reason">
+              {{ leave.reason | slice:0:50 }}{{ leave.reason && leave.reason.length > 50 ? '...' : '' }}
+            </div>
+          </td>
+          <td>
+            <span class="badge bg-warning">{{ leave.status }}</span>
+          </td>
+          <td>
+            <div class="btn-group" role="group">
+              <button 
+                class="btn btn-success btn-sm" 
+                (click)="approveLeave(leave)"
+                [disabled]="isLoading"
+                title="Approve Leave">
+                <i class="fas fa-check"></i>
+                Approve
+              </button>
+              <button 
+                class="btn btn-danger btn-sm" 
+                (click)="rejectLeave(leave)"
+                [disabled]="isLoading"
+                title="Reject Leave">
+                <i class="fas fa-times"></i>
+                Reject
+              </button>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- No Leaves Template -->
+    <ng-template #noLeaves>
+      <div class="text-center py-5">
+        <i class="fas fa-calendar-check fa-3x text-muted mb-3"></i>
+        <h5 class="text-muted">No Pending Leave Requests</h5>
+        <p class="text-muted">All leave requests have been processed or no requests have been submitted.</p>
+      </div>
+    </ng-template>
+  </div>
+
+  <!-- Pagination -->
+  <div class="d-flex justify-content-between align-items-center mt-3" *ngIf="pendingLeaves.length > 0">
+    <div class="text-muted">
+      Showing {{ pendingLeaves.length }} pending leave request(s)
+    </div>
+    <pagination-controls (pageChange)="p = $any($event)"></pagination-controls>
+  </div>
+</div>

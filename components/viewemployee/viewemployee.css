@@ -1,0 +1,147 @@
+/* Sortable header styles */
+.sortable-header {
+  cursor: pointer;
+  user-select: none;
+  transition: background-color 0.2s ease;
+}
+
+.sortable-header:hover {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.sortable-header:active {
+  background-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+/* Search input styling */
+.input-group .form-control:focus {
+  border-color: #0d6efd;
+  box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+
+/* Loading states */
+.table tbody tr.loading {
+  opacity: 0.6;
+}
+
+/* Pagination styling */
+.pagination .page-link {
+  color: #0d6efd;
+}
+
+.pagination .page-item.active .page-link {
+  background-color: #0d6efd;
+  border-color: #0d6efd;
+}
+
+.pagination .page-item.disabled .page-link {
+  color: #6c757d;
+}
+
+/* Responsive table */
+@media (max-width: 768px) {
+  .table-responsive {
+    font-size: 0.875rem;
+  }
+  
+  .btn-sm {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+  }
+}
+
+/* Search status styling */
+.text-success {
+  color: #198754 !important;
+}
+
+.text-warning {
+  color: #ffc107 !important;
+}
+
+/* Action buttons spacing */
+.btn + .btn {
+  margin-left: 0.25rem;
+}
+
+/* Action buttons styling */
+.btn-info {
+  background-color: #0dcaf0;
+  border-color: #0dcaf0;
+  color: #000;
+}
+
+.btn-info:hover {
+  background-color: #31d2f2;
+  border-color: #25cff2;
+  color: #000;
+}
+
+.btn-warning {
+  background-color: #ffc107;
+  border-color: #ffc107;
+  color: #000;
+}
+
+.btn-warning:hover {
+  background-color: #ffca2c;
+  border-color: #ffc720;
+  color: #000;
+}
+
+.btn-danger {
+  background-color: #dc3545;
+  border-color: #dc3545;
+  color: #fff;
+}
+
+.btn-danger:hover {
+  background-color: #bb2d3b;
+  border-color: #b02a37;
+  color: #fff;
+}
+
+/* Responsive action buttons */
+@media (max-width: 768px) {
+  .btn-sm {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+  }
+  
+  .btn-sm i {
+    font-size: 0.7rem;
+  }
+  
+  /* Stack buttons vertically on very small screens */
+  @media (max-width: 576px) {
+    .btn + .btn {
+      margin-left: 0;
+      margin-top: 0.25rem;
+    }
+    
+    td .btn {
+      display: block;
+      width: 100%;
+    }
+  }
+}
+
+/* Table hover effects */
+.table-hover tbody tr:hover {
+  background-color: rgba(0, 0, 0, 0.075);
+}
+
+/* Sort icons */
+.fas.fa-sort,
+.fas.fa-sort-up,
+.fas.fa-sort-down {
+  font-size: 0.875rem;
+}
+
+.text-primary {
+  color: #0d6efd !important;
+}
+
+.text-muted {
+  color: #6c757d !important;
+}

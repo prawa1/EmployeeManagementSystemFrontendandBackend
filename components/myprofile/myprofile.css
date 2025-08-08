@@ -1,0 +1,152 @@
+/* Sidebar Styling */
+.sidebar {
+  height: 100vh;
+  background-color: #0d6efd;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1000;
+  overflow-y: auto;
+  transition: all 0.3s ease;
+}
+
+.nav-link {
+  transition: all 0.3s ease;
+  border-radius: 8px;
+  margin: 2px 0;
+}
+
+.nav-link:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  padding-left: 15px;
+  transform: translateX(5px);
+}
+
+.nav-link.active {
+  background-color: rgba(255, 255, 255, 0.3);
+  font-weight: 600;
+}
+
+/* Main Content Area */
+main {
+  margin-left: 0;
+  transition: margin-left 0.3s ease;
+}
+
+/* Profile Card Styling */
+.card {
+  border: none;
+  border-radius: 15px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+}
+
+/* Profile Item Styling */
+.profile-item {
+  padding: 12px 0;
+  border-bottom: 1px solid #f0f0f0;
+  transition: all 0.3s ease;
+}
+
+.profile-item:last-child {
+  border-bottom: none;
+}
+
+.profile-item:hover {
+  background-color: #f8f9fa;
+  padding-left: 10px;
+  border-radius: 8px;
+}
+
+.profile-item strong {
+  display: inline-block;
+  min-width: 120px;
+  color: #495057;
+  font-weight: 600;
+}
+
+.profile-item span {
+  color: #212529;
+  font-weight: 500;
+}
+
+/* Loading Spinner */
+.spinner-border {
+  width: 3rem;
+  height: 3rem;
+  border-width: 0.3em;
+}
+
+/* Alert Styling */
+.alert {
+  border-radius: 10px;
+  border: none;
+  padding: 15px 20px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.alert-danger {
+  background: linear-gradient(135deg, #f8d7da 0%, #f1aeb5 100%);
+  color: #721c24;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .sidebar {
+    position: fixed;
+    transform: translateX(-100%);
+    width: 250px;
+    z-index: 1050;
+  }
+  
+  .sidebar.show {
+    transform: translateX(0);
+  }
+  
+  main {
+    margin-left: 0;
+    padding: 15px;
+  }
+  
+  .profile-item strong {
+    min-width: 100px;
+    font-size: 0.9rem;
+  }
+  
+  .profile-item span {
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .profile-item {
+    padding: 8px 0;
+  }
+  
+  .profile-item strong {
+    display: block;
+    margin-bottom: 5px;
+    min-width: auto;
+  }
+  
+  .profile-item span {
+    display: block;
+    margin-left: 0;
+  }
+}
+
+/* Icons */
+.fas {
+  color: #0d6efd;
+}
+
+/* Animation for smooth transitions */
+* {
+  transition: color 0.3s ease, background-color 0.3s ease, border-color 0.3s ease;
+}

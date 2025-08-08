@@ -1,0 +1,297 @@
+<!-- <p>viewemployee works!</p> -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary px-4 mb-4">
+    <a class="navbar-brand" roterLink="/admindashurl">Admin Panel</a>
+    <button
+      class="navbar-toggler"
+      type="button"
+      data-bs-toggle="collapse"
+      data-bs-target="#navbarNav"
+    >
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav me-auto">
+        <li class="nav-item"><a class="nav-link" routerLink="/admindashurl">Dashboard</a></li>
+        <li class="nav-item"><a class="nav-link" routerLink="/adminregisterurl">Register Employee</a></li>
+        <li class="nav-item"><a class="nav-link" routerLink="/manageleaveurl">Manage Leave</a></li>
+          <!-- <li class="nav-item"><a class="nav-link" routerLink="/admin/department">Manage Department</a></li> -->
+          <!-- <li class="nav-item"><a class="nav-link" routerLink="/admin/attendance">Mark Attendance</a></li> -->
+          <!-- <li class="nav-item"><a class="nav-link" routerLink="/admin/taskassign">Assign Task</a></li> -->
+        <li class="nav-item"><a class="nav-link" routerLink="/viewemployeeurl">View Employee</a></li>
+      </ul>
+      <button class="btn btn-light" (click)="logout()">Logout</button>
+    </div>
+  </nav>
+  
+  <div class="container py-3">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h3 class="mb-0">Employee List</h3>
+      <div class="d-flex align-items-center gap-3">
+        <!-- Page Size Selector -->
+        <div class="d-flex align-items-center">
+          <label for="pageSize" class="form-label me-2 mb-0">Show:</label>
+          <select 
+            id="pageSize" 
+            class="form-select form-select-sm" 
+            style="width: auto;"
+            [value]="pageSize" 
+            (change)="onPageSizeChange(+$any($event.target).value)">
+            <option *ngFor="let size of pageSizeOptions" [value]="size">{{ size }}</option>
+          </select>
+          <span class="ms-2 text-muted">entries</span>
+        </div>
+        
+        <!-- Refresh Button -->
+        <button 
+          class="btn btn-outline-primary btn-sm" 
+          (click)="refreshEmployees()"
+          [disabled]="isLoading || isSearching">
+          <span *ngIf="isLoading || isSearching" class="spinner-border spinner-border-sm me-1" role="status"></span>
+          <i *ngIf="!isLoading && !isSearching" class="fas fa-sync-alt me-1"></i>
+          Refresh
+        </button>
+      </div>
+    </div>
+
+    <!-- Search Bar -->
+    <div class="row mb-4">
+      <div class="col-md-6">
+        <div class="input-group">
+          <span class="input-group-text">
+            <i class="fas fa-search"></i>
+          </span>
+          <input 
+            type="text" 
+            class="form-control" 
+            placeholder="Search by name, email, phone, or role..."
+            [(ngModel)]="searchQuery"
+            (input)="onSearchInput($any($event.target).value)"
+            [disabled]="isLoading">
+          <button 
+            class="btn btn-outline-secondary" 
+            type="button" 
+            (click)="clearSearch()"
+            [disabled]="!searchQuery.trim() || isLoading || isSearching"
+            title="Clear search">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        
+        <!-- Search Status -->
+        <div class="mt-2">
+          <small class="text-muted" *ngIf="isSearching">
+            <i class="fas fa-spinner fa-spin me-1"></i>
+            Searching...
+          </small>
+          <small class="text-success" *ngIf="searchQuery.trim() && !isSearching && !searchError">
+            <i class="fas fa-check me-1"></i>
+            Search results for "{{ searchQuery }}"
+          </small>
+        </div>
+      </div>
+    </div>
+
+    <!-- Search Error -->
+    <div *ngIf="searchError" class="alert alert-warning" role="alert">
+      <i class="fas fa-exclamation-triangle me-2"></i>
+      {{ searchError }}
+      <button class="btn btn-sm btn-outline-warning ms-2" (click)="performSearch(0, pageSize)">
+        Try Again
+      </button>
+    </div>
+
+    <!-- Loading State -->
+    <div *ngIf="isLoading && employee.length === 0" class="text-center py-5">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+      <p class="mt-2 text-muted">Loading employees...</p>
+    </div>
+
+    <!-- Error State -->
+    <div *ngIf="loadError" class="alert alert-danger" role="alert">
+      <i class="fas fa-exclamation-triangle me-2"></i>
+      {{ loadError }}
+      <button class="btn btn-sm btn-outline-danger ms-2" (click)="refreshEmployees()">
+        Try Again
+      </button>
+    </div>
+
+    <!-- Employee Table -->
+    <div *ngIf="!isLoading || employee.length > 0">
+      <!-- Pagination Info -->
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <div class="text-muted">
+          <span *ngIf="!searchQuery.trim()">
+            Showing {{ (currentPage * pageSize) + 1 }} to {{ Math.min((currentPage + 1) * pageSize, totalElements) }} 
+            of {{ totalElements }} entries
+          </span>
+          <span *ngIf="searchQuery.trim()">
+            Showing {{ (currentPage * pageSize) + 1 }} to {{ Math.min((currentPage + 1) * pageSize, totalElements) }} 
+            of {{ totalElements }} search results for "{{ searchQuery }}"
+          </span>
+        </div>
+        <div class="text-muted" *ngIf="sortBy">
+          <small>
+            <i class="fas fa-sort me-1"></i>
+            Sorted by {{ getSortFieldLabel(sortBy) }} ({{ sortDirection === 'asc' ? 'A-Z' : 'Z-A' }})
+          </small>
+        </div>
+      </div>
+
+      <div class="table-responsive">
+        <table class="table table-bordered table-striped table-hover align-middle">
+          <thead class="table-primary">
+            <tr>
+              <th 
+                class="sortable-header" 
+                (click)="onSort('empId')"
+                [title]="'Sort by Employee ID'">
+                Employee ID
+                <i [class]="getSortIcon('empId')" class="ms-1"></i>
+              </th>
+              <th 
+                class="sortable-header" 
+                (click)="onSort('empName')"
+                [title]="'Sort by Name'">
+                Name
+                <i [class]="getSortIcon('empName')" class="ms-1"></i>
+              </th>
+              <th 
+                class="sortable-header" 
+                (click)="onSort('role')"
+                [title]="'Sort by Designation'">
+                Designation
+                <i [class]="getSortIcon('role')" class="ms-1"></i>
+              </th>
+              <th 
+                class="sortable-header" 
+                (click)="onSort('phoneNo')"
+                [title]="'Sort by Phone Number'">
+                Phone Number
+                <i [class]="getSortIcon('phoneNo')" class="ms-1"></i>
+              </th>
+              <th 
+                class="sortable-header" 
+                (click)="onSort('joiningDate')"
+                [title]="'Sort by Date of Joining'">
+                Date of Joining
+                <i [class]="getSortIcon('joiningDate')" class="ms-1"></i>
+              </th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let emp of employee; trackBy: trackByEmployeeId">
+              <td>{{ emp.empId }}</td>
+              <td>{{ emp.empName }}</td>
+              <td>{{ emp.role }}</td>
+              <td>{{ emp.phoneNo }}</td>
+              <td>{{ emp.joiningDate }}</td>
+              <td>
+                <button 
+                  class="btn btn-sm btn-info me-2" 
+                  (click)="viewEmployee(emp.empId)"
+                  [disabled]="isLoading"
+                  title="View employee details">
+                  <i class="fas fa-eye me-1"></i>View
+                </button>
+                <button 
+                  class="btn btn-sm btn-warning me-2" 
+                  (click)="updateEmployee(emp.empId)"
+                  [disabled]="isLoading"
+                  title="Update employee information">
+                  <i class="fas fa-edit me-1"></i>Update
+                </button>
+                <button 
+                  class="btn btn-sm btn-danger" 
+                  (click)="deleteEmployee(emp.empId, emp.empName)"
+                  [disabled]="isLoadingDependencies || isLoading"
+                  title="Delete employee">
+                  <span *ngIf="isLoadingDependencies" class="spinner-border spinner-border-sm me-1" role="status"></span>
+                  <i *ngIf="!isLoadingDependencies" class="fas fa-trash me-1"></i>
+                  Delete
+                </button>
+              </td>
+            </tr>
+            <!-- Debug information -->
+            <tr *ngIf="employee.length === 0 && !isLoading" class="text-center">
+              <td colspan="6" class="py-4">
+                <div class="alert alert-info">
+                  <h5>No employees found</h5>
+                  <p>Total employees: {{ totalElements }}</p>
+                  <p>Current page: {{ currentPage + 1 }}</p>
+                  <p>Search query: "{{ searchQuery || 'None' }}"</p>
+                  <button class="btn btn-primary" (click)="loadEmployees()">
+                    <i class="fas fa-refresh me-1"></i>Reload Data
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination Controls -->
+      <div class="d-flex justify-content-between align-items-center mt-4" *ngIf="totalPages > 1">
+        <div class="text-muted">
+          Page {{ currentPage + 1 }} of {{ totalPages }}
+        </div>
+        
+        <!-- Custom Pagination Controls -->
+        <nav aria-label="Employee list pagination">
+          <ul class="pagination pagination-sm mb-0">
+            <!-- First Page -->
+            <li class="page-item" [class.disabled]="currentPage === 0">
+              <button class="page-link" (click)="onPageChange(1)" [disabled]="currentPage === 0">
+                <i class="fas fa-angle-double-left"></i>
+              </button>
+            </li>
+            
+            <!-- Previous Page -->
+            <li class="page-item" [class.disabled]="currentPage === 0">
+              <button class="page-link" (click)="onPageChange(currentPage)" [disabled]="currentPage === 0">
+                <i class="fas fa-angle-left"></i>
+              </button>
+            </li>
+            
+            <!-- Page Numbers -->
+            <li class="page-item" 
+                *ngFor="let page of getVisiblePages()" 
+                [class.active]="page === currentPage + 1">
+              <button class="page-link" (click)="onPageChange(page)">{{ page }}</button>
+            </li>
+            
+            <!-- Next Page -->
+            <li class="page-item" [class.disabled]="currentPage === totalPages - 1">
+              <button class="page-link" (click)="onPageChange(currentPage + 2)" [disabled]="currentPage === totalPages - 1">
+                <i class="fas fa-angle-right"></i>
+              </button>
+            </li>
+            
+            <!-- Last Page -->
+            <li class="page-item" [class.disabled]="currentPage === totalPages - 1">
+              <button class="page-link" (click)="onPageChange(totalPages)" [disabled]="currentPage === totalPages - 1">
+                <i class="fas fa-angle-double-right"></i>
+              </button>
+            </li>
+          </ul>
+        </nav>
+      </div>
+
+      <!-- Legacy Pagination (fallback) -->
+      <div class="text-center mt-4" *ngIf="totalPages <= 1 && employee.length > 0">
+        <pagination-controls (pageChange)="onPageChange($event)"></pagination-controls>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete Confirmation Dialog -->
+  <app-delete-confirmation-dialog
+    [isVisible]="showDeleteDialog"
+    [data]="deleteConfirmationData"
+    (confirmed)="onDeleteConfirmed($event)"
+    (cancelled)="onDeleteCancelled()">
+  </app-delete-confirmation-dialog>
+  
+  
